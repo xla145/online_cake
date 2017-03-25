@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>商品管理</title>
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+		<style type="text/css">
+		.goods-find{padding: 9px 0px;}
+		.goods-find ul{-webkit-padding-start:0px;}
+		.goods-find ul li {margin: 0px 5px;width:150px;float: left;list-style-type: none;}
+		.goods-operation {margin: 10px 0px;background-color: #eef1f6;padding: 6px 8px}
+		.page{padding: 6px 0px;background-color: #eef1f6;}   
+		</style>
+	</head>
+	<body>
+  		<div id="app">
+	  		<el-dialog title="商品信息" v-model="dialogVisible" size="small">
+			  <el-form :model="goods" label-width="100px" :rules="rule" ref="goods">
+					<el-input v-model="goods.id" type="hidden"></el-input>
+					<el-form-item label="商品名字" prop="name">
+						<el-input v-model="goods.name"></el-input>
+					</el-form-item>
+					<el-form-item label="类型">
+						<el-select v-model="goods.type" placeholder="请选择商品类型">
+							<el-option label="水果类" value="1"></el-option>
+							<el-option label="巧克力" value="2"></el-option>
+							<el-option label="海绵蛋糕" value="3"></el-option>
+							<el-option label="布丁蛋糕 " value="4"></el-option>
+						</el-select>
+					</el-form-item>	
+					<el-form-item label="描述" prop="description">
+						<el-input v-model="goods.description"></el-input>
+					</el-form-item>				
+					<el-form-item label="价格" prop="price"> 
+						<el-input v-model="goods.price"></el-input>
+					</el-form-item>
+					<el-form-item label="状态">
+						<el-select v-model="goods.type" placeholder="请选择商品状态">
+							<el-option label="上线" value="1"></el-option>
+							<el-option label="下线" value="0"></el-option>
+						</el-select>
+					</el-form-item>	
+					<el-form-item label="店铺信息">
+						<el-select v-model="goods.shopId" placeholder="请选择店铺信息">
+							<el-option label="人间美味" value="1"></el-option>
+							<el-option label="兴威蛋糕店" value="2"></el-option>
+							<el-option label="王者至尊" value="3"></el-option>
+							<el-option label="阿斯顿" value="4"></el-option>
+						</el-select>
+					</el-form-item>				
+					<el-form-item>
+						<el-button type="primary" @click="submitForm('goods')">确定</el-button>
+						<el-button @click="dialogVisible = false">取消</el-button>
+					</el-form-item>
+				</el-form>
+			</el-dialog>
+			<div class="goods-find">				
+				 <ul>
+				 	<li><el-input placeholder="请输入商品名字" v-model="goodsName"></el-input></li>
+<!-- 				 	<li><el-input placeholder="请输入店铺电话" v-model="goodsPhone"></el-input></li> -->
+				 	<li>
+				 		<el-select v-model="goodsType" clearable placeholder="请选择商品类型">
+							<el-option label="水果类" value="1"></el-option>
+							<el-option label="巧克力" value="2"></el-option>
+							<el-option label="海绵蛋糕" value="3"></el-option>
+							<el-option label="布丁蛋糕 " value="4"></el-option>
+				 		</el-select>
+				 	</li>				 	
+				 </ul>	
+					 <el-button type="primary" icon="search" @click="findGoods">搜索</el-button>		 				 
+			</div>	
+			<div class="goods-content">
+			<div class="goods-operation">
+				<el-button type="primary" @click="addGoods"><i class="el-icon-plus">&nbsp;添加</i></el-button>				
+				<el-button type="primary" @click="updateGoods"><i class="el-icon-edit">&nbsp;&nbsp;修改</i></el-button>
+				<el-button type="primary" @click="deleteGoods" icon="delete">删除</el-button>
+				<span></span>
+			</div>
+				<template>
+				  <el-table
+				    :data="goodsDate"
+				    border
+				    style="width: 100%"
+				    @selection-change="handleSelectionChange">
+				    <el-table-column
+				      prop="id"
+				      type="selection"
+				      width="55">
+				    </el-table-column>
+				    <el-table-column
+				      prop="name"
+				      label="商品名字"
+				      >
+				    </el-table-column>
+				    <el-table-column
+				      prop="type"
+				      label="商品类型"
+				      >
+				    </el-table-column>
+				    <el-table-column
+				      prop="description"
+				      label="商品描述"
+				      show-overflow-tooltip>
+				    </el-table-column>
+				    <el-table-column
+				      prop="price"
+				      label="价格">
+				    </el-table-column>
+				    <el-table-column
+				      prop="update_time"
+				      label="更新时间">
+				    </el-table-column>				    
+				    <el-table-column
+				      prop="create_time"
+				      label="创建时间">
+				    </el-table-column>
+				  </el-table>
+				  <div class="page">
+				    <el-pagination
+				      @size-change="handleSizeChange"
+				      @current-change="handleCurrentChange"
+				      :current-page="currentPage"
+				      :page-sizes="[5, 10, 30, 50]"
+				      :page-size="pageSize"
+				      layout="total, sizes, prev, pager, next, jumper"
+				      :total="total">
+				    </el-pagination>
+  				</div>
+				</template>
+			</div>			
+		</div>
+	</body>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script>
+		var vm = new Vue({
+			el: '#app',		
+			data: {   				  
+				  goods:{
+					  id:'',
+					  name: '',
+			          type: '1',
+			          description: '',
+			          price: '',
+			          status: '1',
+			          shopId:'',
+				  },
+				  goodsName:'',
+				  goodsType:'',			  
+				  rule: {
+			          name: [
+		                { required: true, message: '请输入商品名字', trigger: 'blur' },
+		                { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+			          ],
+			          description: [
+			        	{ required: true, message: '请输入商品描述', trigger: 'blur' },
+		          	  ], 
+		          	  price: [
+			        	{ required: true, message: '请输入价格', trigger: 'blur' },
+				      ],
+			      },
+				  dialogVisible: false,
+				  apiUrl: 'mgoods/getAllGoods',
+				  currentPage:1,
+				  total:'',
+				  pageSize:5,
+				  goodsDate: [],
+				  multipleSelection: [],
+				  /* var checkPhone = (rule, value, callback) => {
+				        if (!value) {
+				          return callback(new Error('手机号不能为空'));
+				        }
+				        setTimeout(() => {
+				          var re = /^1\d{10}$/;
+				          if (re.test(value)) {
+				              callback(new Error('请输入正确的手机号!'));
+				          } else {
+				              callback();
+				          }
+				        }, 1000);
+				  }; */
+		    },
+		    mounted: function() {
+		    	var params = new URLSearchParams();
+	        	params.append('currentPage', this.currentPage);
+				this.getGoodsContent(params);
+			},
+		    methods: {
+		    	getGoodsContent(data){
+		    		axios.post(this.apiUrl,data)
+		    		.then(function (response) {
+			    		  vm.goodsDate = response.data.goodsList;
+			    		  vm.total = response.data.totalRow;
+			    		  vm.currentPage = response.data.currentPage;			    		  
+			    	      console.log(response);
+			    	}).catch(function (error) {
+			    	    console.log(error);
+			    	});
+		    	},
+		    	getGoods(id){
+		    		axios.get("mgoods/getgoods",{
+		    			params: {goodsId:id}
+		    		}).then(function (response) {
+			    		  vm.goods.id = response.data.goods.id;
+			    		  vm.goods.name = response.data.goods.name;
+			    		  vm.goods.address = response.data.goods.address;
+			    		  vm.goods.phone = response.data.goods.phone;
+			    		  vm.goods.status = response.data.goods.status+"";//转成字符串类型
+			    		  vm.dialogVisible = true;
+			    	      console.log(response);
+			    	}).catch(function (error) {
+			    	    console.log(error);
+			    	});
+		    	},
+		    	handleSizeChange(val) {
+		    		//var data = {currentPage:vm.currentPage,pageSize:val}
+		    		//this.getgoodsContent(data)
+		    		this.pageSize = val;
+		    		this.findGoods();
+		            console.log(val);
+		        },
+		        handleCurrentChange(val) {
+		        	this.currentPage = val;
+		        	//var data = {currentPage:val,pageSize:vm.pageSize};
+		        	this.findGoods();
+		            console.log(val);
+		        },
+		        addGoods(){
+		        	this.dialogVisible = true;
+		        	this.goods.id = '';
+					this.goods.name = '';
+					this.goods.type = '1';
+					this.goods.description = '';
+					this.goods.price = '';
+					this.goods.status = '1';
+					this.goods.shopId = '1';
+		        },
+		        updateGoods(){
+ 		        	if(this.multipleSelection != "" && this.multipleSelection.length == 1){
+ 		        		var id = this.multipleSelection[0].id;
+ 		        		this.getGoods(id);
+ 		        		this.multipleSelection = '';
+ 		        	}else{
+ 		        		this.$message.error('请选择一个商品进行更新');
+ 		        	}
+		        },
+		        findGoods(){
+		        	var params = new URLSearchParams();
+		        	params.append('currentPage', this.currentPage);
+		        	params.append('pageSize', this.pageSize);
+		        	params.append('goodsName', this.goodsName);
+		        	params.append('goodsPhone', this.goodsPhone);
+		        	params.append('status', this.goodsStatus);
+		        	this.getGoodsContent(params);
+		        },
+				deleteGoods(){
+		        	if(this.multipleSelection == ""){
+		        		this.$message.error('请选择一个商品进行删除');
+		        		return;
+ 		        	}
+		        	this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+		                confirmButtonText: '确定',
+		                cancelButtonText: '取消',
+		                type: 'warning'
+		              }).then(() => {		            	
+		            	var id = this.multipleSelection[0].id;
+		            	axios.get("mgoods/delGoods",{
+			    			params: {goodsId:id}
+			    		}).then((response) => {
+			    			var msg = response.data.msg;
+			    			if(response.data.msg == ""){
+			    				this.$message({
+				                  type: 'success',
+				                  message: '删除成功!'
+					            });
+			    				this.findgoods()
+			    			}else{
+			    				this.$message.error(msg);
+			    			}
+				    	    console.log(response);
+				    	}).catch(function (error) {
+				    	    console.log(error);
+				    	});		                
+		              }).catch(() => {
+		                this.$message({
+		                  type: 'info',
+		                  message: '已取消删除'
+		                });          
+		             });       	
+		        },
+		        handleSelectionChange(val) {
+		            this.multipleSelection = val;
+		        },
+		        submitForm(formName) {
+			        this.$refs[formName].validate((valid) => {
+			          if (valid) {
+			        	  var params = new URLSearchParams();
+			        	  params.append('id', this.goods.id);
+			        	  params.append('name', this.goods.name);
+			        	  params.append('type', this.goods.type);
+			        	  params.append('description', this.goods.description);
+			        	  params.append('price', this.goods.price);
+			        	  params.append('status', this.goods.status);
+			        	  params.append('shopId', this.goods.shopId);
+			        	  axios.post('/mgoods/save', params)
+			        		  .then((response) =>{
+				    			var msg = response.data.msg;
+				    			if(response.data.msg == ""){
+				    				this.dialogVisible = false;
+				    				var data = 
+				    				this.findGoods();
+				    			}else{
+				    				vm.$message.error(msg);
+				    			}
+			        		  })
+			        		  .catch(function (error) {
+			        		    console.log(error);
+			        		  });		        	  
+			          } else {
+			            //console.log('error submit!!');
+			            return false;
+			          }
+			    });
+		     },
+		    },
+		  });
+	</script>
+
+</html>

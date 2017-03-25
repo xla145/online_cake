@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>店铺管理</title>
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+		<style type="text/css">
+		.shop-find{padding: 9px 0px;}
+		.shop-find ul{-webkit-padding-start:0px;}
+		.shop-find ul li {margin: 0px 5px;width:150px;float: left;list-style-type: none;}
+		.shop-operation {margin: 10px 0px;background-color: #eef1f6;padding: 6px 8px}
+		.page{padding: 6px 0px;background-color: #eef1f6;}   
+		</style>
+	</head>
+	<body>
+  		<div id="app">
+	  		<el-dialog  v-model="dialogVisible" size="small" v-bind:title="title">
+			  <el-form :model="shop" label-width="100px" :rules="rule" ref="shop">
+					<el-input v-model="shop.id" type="hidden"></el-input>
+					<el-form-item label="店铺名字" prop="name">
+						<el-input v-model="shop.name"></el-input>
+					</el-form-item>
+					<el-form-item label="店铺电话" prop="phone">
+						<el-input v-model="shop.phone"></el-input>
+					</el-form-item>
+					<el-form-item label="店铺地址" prop="address"> 
+						<el-input v-model="shop.address"></el-input>
+					</el-form-item>
+					<el-form-item label="状态">
+						<el-select v-model="shop.status" placeholder="请选择店铺状态">
+							<el-option label="上线" value="1"></el-option>
+							<el-option label="下线" value="0"></el-option>
+						</el-select>
+					</el-form-item>				
+					<el-form-item>
+						<el-button type="primary" @click="submitForm('shop')">确定</el-button>
+						<el-button @click="dialogVisible = false">取消</el-button>
+					</el-form-item>
+				</el-form>
+			</el-dialog>
+			<div class="shop-find">				
+				 <ul>
+				 	<li><el-input placeholder="请输入店铺名字" v-model="shopName"></el-input></li>
+				 	<li><el-input placeholder="请输入店铺电话" v-model="shopPhone"></el-input></li>
+				 	<li>
+				 		<el-select v-model="shopStatus" clearable placeholder="请选择店铺状态">
+						<el-option label="上线" value="1"></el-option>
+						<el-option label="下线" value="0"></el-option>
+				 		</el-select>
+				 	</li>				 	
+				 </ul>	
+					 <el-button type="primary" icon="search" @click="search">搜索</el-button>		 				 
+			</div>	
+			<div class="shop-content">
+			<div class="shop-operation">
+				<el-button type="primary" @click="add"><i class="el-icon-plus">&nbsp;添加</i></el-button>				
+				<el-button type="primary" @click="update"><i class="el-icon-edit">&nbsp;&nbsp;修改</i></el-button>
+				<el-button type="primary" @click="del" icon="delete">删除</el-button>
+				<span></span>
+			</div>
+				<template>
+				  <el-table
+				    :data="shopDate"
+				    border
+				    style="width: 100%"
+				    @selection-change="handleSelectionChange">
+				    <el-table-column
+				      prop="id"
+				      type="selection"
+				      width="55">
+				    </el-table-column>
+				    <el-table-column
+				      prop="name"
+				      label="店铺名字"
+				      width="200">
+				    </el-table-column>
+				    <el-table-column
+				      prop="phone"
+				      label="店铺电话"
+				      width="200">
+				    </el-table-column>
+				    <el-table-column
+				      prop="address"
+				      label="地址"
+				      show-overflow-tooltip>
+				    </el-table-column>
+				    <el-table-column
+				      prop="update_time"
+				      label="更新时间">
+				    </el-table-column>				    
+				    <el-table-column
+				      prop="create_time"
+				      label="创建时间">
+				    </el-table-column>
+				  </el-table>
+				  <div class="page">
+				    <el-pagination
+				      @size-change="handleSizeChange"
+				      @current-change="handleCurrentChange"
+				      :current-page="currentPage"
+				      :page-sizes="[5, 10, 30, 50]"
+				      :page-size="pageSize"
+				      layout="total, sizes, prev, pager, next, jumper"
+				      :total="total">
+				    </el-pagination>
+  				</div>
+				</template>
+			</div>			
+		</div>
+	</body>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script>
+		var vm = new Vue({
+			el: '#app',		
+			data: {   				  
+				  shop:{},
+				  title:'',
+				  shopName:'',
+				  shopPhone:'',
+				  shopStatus:'1',				  
+				  rule: {
+			          name: [
+		                { required: true, message: '请输入账号', trigger: 'blur' },
+		                { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+			          ],
+			          phone: [
+			        	{ required: true, message: '请输入手机号', trigger: 'blur' },
+		          	  ], 
+			          address: [
+			        	{ required: true, message: '请输入地址', trigger: 'blur' },
+			            { min: 3, max: 30, message: '长度在 3 到 30 个字符', trigger: 'blur' }
+				      ],
+			      },
+				  dialogVisible: false,
+				  getUrl: 'mshop/getAllShop',
+				  delUrl: 'mshop/delShop',
+				  getCotentUrl: 'mshop/getShop',
+				  saveUrl: 'mshop/save',
+				  currentPage:1,
+				  total:'',
+				  pageSize:5,
+				  shopDate: [],
+				  multipleSelection: [],
+				  /* var checkPhone = (rule, value, callback) => {
+				        if (!value) {
+				          return callback(new Error('手机号不能为空'));
+				        }
+				        setTimeout(() => {
+				          var re = /^1\d{10}$/;
+				          if (re.test(value)) {
+				              callback(new Error('请输入正确的手机号!'));
+				          } else {
+				              callback();
+				          }
+				        }, 1000);
+				  }; */
+		    },
+		    mounted: function() {
+		    	var params = new URLSearchParams();
+	        	params.append('currentPage', this.currentPage);
+				this.get(params);
+			},
+		    methods: {
+		    	get:function (data){
+		    		axios.post(this.getUrl,data)
+		    		.then((response) =>{
+			    		  vm.shopDate = response.data.shopList;
+			    		  vm.total = response.data.totalRow;
+			    		  vm.currentPage = response.data.currentPage;			    		  
+			    	      console.log(response);
+			    	}).catch(function (error) {
+			    	    console.log(error);
+			    	});
+		    	},
+		    	getContent:function (id){
+		    		axios.get(this.getContentUrl,{
+		    			params: {shopId:id}
+		    		}).then((response) => {
+			    		  this.shop.id = response.data.shop.id;
+			    		  this.shop.name = response.data.shop.name;
+			    		  this.shop.address = response.data.shop.address;
+			    		  this.shop.phone = response.data.shop.phone;
+			    		  this.shop.status = response.data.shop.status+"";//转成字符串类型
+			    		  this.dialogVisible = true;
+			    	      console.log(response);
+			    	}).catch(function (error) {
+			    	    console.log(error);
+			    	});
+		    	},
+		    	handleSizeChange:function(val) {
+		    		//var data = {currentPage:vm.currentPage,pageSize:val}
+		    		//this.get(data)
+		    		this.pageSize = val;
+		    		this.findShop();
+		            console.log(val);
+		        },
+		        handleCurrentChange:function(val) {
+		        	this.currentPage = val;
+		        	//var data = {currentPage:val,pageSize:vm.pageSize};
+		        	this.findShop();
+		            console.log(val);
+		        },
+		        add:function(){
+		        	this.title = "创建信息";
+		        	this.dialogVisible = true;
+		        	this.shop = {
+						  id:'',
+						  name: '',
+				          phone: '',
+				          address: '',
+				          status: '1',
+					};        	
+		        },
+		        update:function(){//更新店铺信息
+ 		        	if(this.multipleSelection.length == 1){
+ 		        		var ID = this.multipleSelection[0].id;
+ 		        		let currentManifest = this.shop.find(x => x.ID == ID);
+ 		                this.shop = JSON.parse(JSON.stringify(currentManifest));
+ 		        		//this.getShop(id);
+ 		        		this.multipleSelection = '';
+ 		        	}else{
+ 		        		this.$message.error('请选择一个店铺进行更新');
+ 		        	}
+		        },
+		        searh:function(){
+		        	var params = new URLSearchParams();
+		        	params.append('currentPage', this.currentPage);
+		        	params.append('pageSize', this.pageSize);
+		        	params.append('shopName', this.shopName);
+		        	params.append('shopPhone', this.shopPhone);
+		        	params.append('status', this.shopStatus);
+		        	this.get(params);
+		        },
+				del:function(){
+		        	if(this.multipleSelection.length == 0){
+		        		this.$message.error('请选择一个店铺进行删除');
+		        		return;
+ 		        	}
+		        	this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+		                confirmButtonText: '确定',
+		                cancelButtonText: '取消',
+		                type: 'warning'
+		              }).then(() => {		            	
+		            	var id = this.multipleSelection[0].id;
+		            	axios.get(this.delUrl,{
+			    			params: {shopId:id}
+			    		}).then((response) => {
+			    			var msg = response.data.msg;
+			    			if(response.data.msg == ""){
+			    				this.$message({
+				                  type: 'success',
+				                  message: '删除成功!'
+					            });
+			    				this.findShop()
+			    			}else{
+			    				this.$message.error(msg);
+			    			}
+				    	    console.log(response);
+				    	}).catch(function (error) {
+				    	    console.log(error);
+				    	});		                
+		              }).catch(() => {
+		                this.$message({
+		                  type: 'info',
+		                  message: '已取消删除'
+		                });          
+		             });       	
+		        },
+		        handleSelectionChange(val) {
+		            this.multipleSelection = val;
+		        },
+		        submitForm(formName) {
+			        this.$refs[formName].validate((valid) => {
+			          if (valid) {
+			        	  var params = new URLSearchParams();
+			        	  params.append('id', this.shop.id);
+			        	  params.append('name', this.shop.name);
+			        	  params.append('phone', this.shop.phone);
+			        	  params.append('address', this.shop.address);
+			        	  params.append('status', this.shop.status);
+			        	  axios.post(this.saveUrl, params)
+			        		  .then((response) =>{
+				    			var msg = response.data.msg;
+				    			if(response.data.msg == ""){
+				    				this.dialogVisible = false;
+				    				var data = 
+				    				this.findShop();
+				    			}else{
+				    				vm.$message.error(msg);
+				    			}
+			        		  })
+			        		  .catch(function (error) {
+			        		    console.log(error);
+			        		  });		        	  
+			          } else {
+			            //console.log('error submit!!');
+			            return false;
+			          }
+			    });
+		     },
+		    },
+		  });
+	</script>
+
+</html>

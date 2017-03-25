@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>首页</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+<style type="text/css">
+</style>
+</head>
+<body>
+	<div id="app">
+			 <el-col :span="8">
+				   <el-menu default-active="2" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" theme="dark">
+				      <el-submenu index="1">
+				        <template slot="title">用户管理</template>
+				          <el-menu-item index="1-1"><router-link to="/user/foo">查看用户</router-link></el-menu-item>			          
+				          <el-menu-item index="1-1"><router-link to="/user/foo/profile">查看用户</router-link></el-menu-item>	
+				          <el-menu-item index="1-1"><router-link to="/user/foo/posts">查看用户</router-link></el-menu-item>	
+				          <el-menu-item index="1-2">选项2</el-menu-item>
+	      			  </el-submenu>
+	      			  <el-submenu index="2">
+				          <template slot="title">商品管理</template>
+				          <el-menu-item index="1-1">查看商品</el-menu-item>
+				          <el-menu-item index="1-2">选项2</el-menu-item>
+				      </el-submenu>
+				      <el-submenu index="3">
+				          <template slot="title">店铺管理</template>
+				          <el-menu-item index="1-1">查看店铺</el-menu-item>
+				          <el-menu-item index="1-2">选项2</el-menu-item>
+				      </el-submenu>
+				    </el-menu>
+	  			</el-col>
+			    <router-view></router-view>
+		</div>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+	<script type="text/javascript">
+			const User = {
+			  template: `
+			    <div class="user">
+			      <h2>User {{ $route.params.id }}</h2>
+			      <router-view></router-view>
+			    </div>			  `
+			}
+			const UserHome = { template: '<div>Home</div>' }
+			const UserProfile = { template: '<div>Profile</div>' }
+			const UserPosts = { template: '<div>Posts</div>' }
+			const router = new VueRouter({
+			  routes: [
+			    { path: '/user/:id', component: User,
+			      children: [
+			        { path: '', component: UserHome },
+			        { path: 'profile', component: UserProfile },
+			        { path: 'posts', component: UserPosts }
+			      ]
+			    }
+			  ]
+		});
+		var Main = {
+			router,
+			methods: {
+		      handleOpen(key, keyPath) {
+		        console.log(key, keyPath);
+		      },
+		      handleClose(key, keyPath) {
+		        console.log(key, keyPath);
+		      }
+		    }
+		  }
+		var Ctor = Vue.extend(Main)
+		new Ctor().$mount('#app')	
+	</script>
+</body>
+</html>

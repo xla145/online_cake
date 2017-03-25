@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>用户登录</title>
+<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+<style type="text/css">
+	body{background-color: #1b1818;}
+	#login{width: 350px;-webkit-border-radius: 5px;background-clip: padding-box;padding: 35px 35px 15px 35px;background-color: #F9FAFC;margin: 180px auto;
+    border: 2px solid #8492A6;-moz-border-radius: 5px;margin-bottom: 20px;}
+	#login h3{text-align: center;}
+  }
+</style>
+</head>
+<body>
+	<div id ="login">
+			<h3 class="title">系统登录</h3>
+			<el-form :model="users" :rules="rule" ref="users" label-position="left" label-width="20%" class="demo-ruleForm">
+				  <el-form-item label="账号" prop="name">
+   					<el-input v-model="users.name"></el-input>
+  				  </el-form-item>
+				  <el-form-item label="密码" prop="password">
+				    <el-input type="password" v-model="users.password"></el-input>
+				  </el-form-item>
+				  <el-form-item label="用户类型" prop="resource">
+				    <el-radio-group v-model="users.type">
+				      <el-radio :label="1">管理员</el-radio>
+				      <el-radio :label="2">商家</el-radio>
+				    </el-radio-group>
+  				  </el-form-item>
+				  <el-form-item>
+				    <el-button type="primary" @click="submitForm('users')" >登录</el-button>
+				    <el-button @click="resetForm('users')">重置</el-button>
+				  </el-form-item>
+			</el-form>
+	</div>
+	<script src="https://unpkg.com/vue/dist/vue.js"></script>
+	<!-- 引入组件库 -->
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script>
+		var vm = new Vue({
+			el: '#login',	
+			data: {	      
+		    	users: {
+		          password: '',
+		          name: '',
+		          type: 1
+		        },
+		        rule: {
+		          name: [
+	                { required: true, message: '请输入账号', trigger: 'blur' },
+	                { min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur' }
+		          ],
+		          password: [
+		        	{ required: true, message: '请输入密码', trigger: 'blur' },
+		            { min: 3, max: 20, message: '长度在 3 到 20个字符', trigger: 'blur' }
+		          ],
+		       }
+		    },
+		    methods: {
+		      submitForm(formName) {
+		        this.$refs[formName].validate((valid) => {
+		          if (valid) {
+		        	  var params = new URLSearchParams();
+		        	  params.append('name', this.users.name);
+		        	  params.append('password', this.users.password);
+		        	  params.append('type', this.users.type);
+		        	  axios.post('/login', params)
+		        		  .then(function (response) {
+		        		    //console.log(response);
+			    			var msg = response.data.msg;
+			    			if(response.data.msg == ""){
+			    				location.href = "index";
+			    			}else{
+			    				vm.$message.error(msg);
+			    			}
+		        		  })
+		        		  .catch(function (error) {
+		        		    console.log(error);
+		        		  });		        	  
+		          } else {
+		            //console.log('error submit!!');
+		            return false;
+		          }
+		        });
+		      },
+		      resetForm(formName) {
+		        this.$refs[formName].resetFields();
+		      }
+		   }
+	  });
+	  //var Ctor = Vue.extend(Main)
+	  //new Ctor().$mount('#login')
+</script>
+</body>
+</html>
