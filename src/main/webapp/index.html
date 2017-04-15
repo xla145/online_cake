@@ -1,0 +1,19 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><title>最美丽江</title><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><script>// 动态计算font-size基础值
+      (function (doc, win) {
+        var docEl = doc.documentElement,
+          resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
+          recalc = function () {
+            var clientWidth = docEl.clientWidth
+            if (!clientWidth) return
+            if (clientWidth > 700) {
+              clientWidth = 700
+            }
+            docEl.style.fontSize = 16 * (clientWidth / 375) + 'px'
+          }
+        if (!doc.addEventListener) return
+        win.addEventListener(resizeEvt, recalc, false)
+        doc.addEventListener('DOMContentLoaded', recalc, false)
+      })(document, window)</script><style type=text/css>body {
+        display: block;
+        margin: 0px;
+      }</style><link href=/static/css/app.2d1655fa0f1eefb5126e9c4aef4aaae2.css rel=stylesheet></head><body><div id=app></div><script type=text/javascript src=/static/js/manifest.dce3efa736d4c480306f.js></script><script type=text/javascript src=/static/js/vendor.7bb4271ba3fe7c1b9256.js></script><script type=text/javascript src=/static/js/app.fa129310e4afec297de4.js></script></body></html>

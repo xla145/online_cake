@@ -1,17 +1,14 @@
 package site.xulian.cake.controller.web;
 
-import java.util.List;
-
 import com.jfinal.core.Controller;
 import com.jfinal.ext.route.ControllerBind;
 import com.jfinal.kit.JsonKit;
-import com.jfinal.log.Logger;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.User;
-
-import site.xulian.cake.model.Goods;
+import org.apache.log4j.Logger;
 import site.xulian.cake.model.Order;
 import site.xulian.cake.utils.Constant;
 import site.xulian.cake.utils.JsonType;
+
+import java.util.List;
 
 /**
  * @author Administrator
@@ -19,7 +16,7 @@ import site.xulian.cake.utils.JsonType;
  */
 @ControllerBind(controllerKey="/order")
 public class OrderController extends Controller {
-	Logger logger =Logger.getLogger(this.getClass());
+  Logger logger =Logger.getLogger(this.getClass());
   public void index(){
 	 render("index.html");
   }

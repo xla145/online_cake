@@ -6,15 +6,21 @@ import com.jfinal.config.Interceptors;
 import com.jfinal.config.JFinalConfig;
 import com.jfinal.config.Plugins;
 import com.jfinal.config.Routes;
+import com.jfinal.ext.plugin.quartz.QuartzPlugin;
 import com.jfinal.ext.plugin.tablebind.AutoTableBindPlugin;
 import com.jfinal.ext.plugin.tablebind.SimpleNameStyles;
 import com.jfinal.ext.route.AutoBindRoutes;
 import com.jfinal.kit.PropKit;
+import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
 import com.jfinal.plugin.activerecord.dialect.MysqlDialect;
 import com.jfinal.plugin.druid.DruidPlugin;
 
+import com.jfinal.plugin.ehcache.EhCachePlugin;
+import com.jfinal.template.Engine;
+import site.xulian.cake.interceptor.AllowCrossDomain;
 import site.xulian.cake.interceptor.AttrInter;
 import site.xulian.cake.interceptor.LoginInter;
+import site.xulian.cake.model._MappingKit;
 
 /**
  * API引导式配置
@@ -40,11 +46,10 @@ public class Config extends JFinalConfig {
 		me.add(routeBind);
 	}
 
-	// public static C3p0Plugin createC3p0Plugin() {
-	// return new C3p0Plugin(PropKit.get("jdbcUrl"), PropKit.get("user"),
-	// PropKit.get("password").trim());
-	// }
+	@Override
+	public void configEngine(Engine me) {
 
+	}
 	/**
 	 * 配置插件
 	 */
@@ -54,17 +59,14 @@ public class Config extends JFinalConfig {
 				PropKit.get("db.user"), PropKit.get("db.password"),
 				PropKit.get("db.driver"));
 		me.add(druidDefault);
-		// Model自动绑定表插件
-		AutoTableBindPlugin tableBindDefault = new AutoTableBindPlugin(
-				druidDefault, SimpleNameStyles.LOWER);
-		// tableBindDefault.setContainerFactory(new
-		// CaseInsensitiveContainerFactory(false)); // 忽略字段大小写
-		tableBindDefault.setShowSql(PropKit.getBoolean("devMode", false));
-		// mysql的数据库方言
-		tableBindDefault.setDialect(new MysqlDialect());
-		tableBindDefault.autoScan(false);
-		// _MappingKit.mapping(tableBindDefault);
-		me.add(tableBindDefault);
+		ActiveRecordPlugin arp = new ActiveRecordPlugin(druidDefault);
+		// 所有映射在 MappingKit 中自动化搞定
+		_MappingKit.mapping(arp);
+		me.add(arp);
+		//添加定时器
+		me.add(new QuartzPlugin("job.properties"));
+		// 添加缓存
+		me.add(new EhCachePlugin());
 	}
 
 	/**
@@ -72,6 +74,7 @@ public class Config extends JFinalConfig {
 	 */
 	public void configInterceptor(Interceptors me) {
 		me.add(new AttrInter());
+		// me.add(new AllowCrossDomain());
 	}
 
 	/**

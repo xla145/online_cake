@@ -6,7 +6,7 @@ public class DataObj<T> implements Serializable {
 	private static final long serialVersionUID = 7933714516649991146L;
 	
 	public static final int CODE_SUCCESS = 0;
-	public static final int CODE_FAIL = -1;
+	public static final int CODE_FAIL = -99;
 	
 	private int successCode = CODE_SUCCESS;
 	private int code;
@@ -36,6 +36,11 @@ public class DataObj<T> implements Serializable {
 		this.msg = msg;
 	}
 	
+	public static <T> DataObj<T> getSuccessData(T data){
+		DataObj<T> obj = new DataObj<>(CODE_SUCCESS);
+		obj.setSuccessData(data);
+		return obj;
+	}
 	
 	public boolean isSuccessCode() {
 		return this.code == successCode;

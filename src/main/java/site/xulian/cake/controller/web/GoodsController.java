@@ -5,9 +5,7 @@ import java.util.List;
 import com.jfinal.core.Controller;
 import com.jfinal.ext.route.ControllerBind;
 import com.jfinal.kit.JsonKit;
-import com.jfinal.log.Logger;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion.User;
-
+import org.apache.log4j.Logger;
 import site.xulian.cake.model.Goods;
 import site.xulian.cake.utils.Constant;
 import site.xulian.cake.utils.JsonType;
